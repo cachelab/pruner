@@ -1,0 +1,43 @@
+version: 2
+
+jobs:
+  build:
+    working_directory: /go/src/pruner
+    docker:
+      - image: golang:1.12.9
+        environment:
+          - ELASTICSEARCH_URL: http://127.0.0.1:9200
+          - GO111MODULE: "on"
+          - RUN_ONCE: true
+      - image: docker.elastic.co/elasticsearch/elasticsearch:7.3.0
+        environment:
+          - discovery.type: single-node
+    steps:
+      - checkout
+      - run:
+          name: Wait For Elasticsearch
+          command: |
+            sleep 15 && wget --waitretry=10 --retry-connrefused -v http://127.0.0.1:9200/
+      - run:
+          name: Insert Data Into Elasticsearch
+          command: |
+            curl -H "Content-Type: application/json" -XPOST "http://127.0.0.1:9200/logs-2009-11-15/log" -d "{\"message\" : \"console log is 10\", \"level\" : \"info\", \"date\" : \"2009-11-15T14:12:12\"}"
+      - run:
+          name: Create Directory
+          command: |
+            mkdir -p .coverage
+      - run:
+          name: Build
+          command: |
+            go build -o pruner
+      - run:
+          name: Go Test
+          command: |
+            go test -vet=off -v -tags test -coverprofile=/tmp/cov.out ./...
+      - run:
+          name: Go Tool
+          command: |
+            go tool cover -html=/tmp/cov.out -o=.coverage/cov.html
+      - store_artifacts:
+          path: .coverage
+          destination: coverage
