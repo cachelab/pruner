@@ -4,7 +4,7 @@ jobs:
   build:
     working_directory: /go/src/pruner
     docker:
-      - image: golang:1.12.9
+      - image: golang:1.13.4
         environment:
           - GO111MODULE: "on"
       - image: docker.elastic.co/elasticsearch/elasticsearch:7.3.0
