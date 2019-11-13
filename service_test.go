@@ -35,7 +35,7 @@ func TestInit(t *testing.T) {
 	os.Setenv("RUN_ONCE", "true")
 	os.Setenv("PREFIXES", "logs")
 	err = svc.Init()
-	assert.NotEqual(t, err, nil)
+	assert.Equal(t, err, nil)
 
 	os.Setenv("ELASTICSEARCH_URL", "http://127.0.0.1:9200")
 	err = svc.Init()
