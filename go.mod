@@ -1,4 +1,4 @@
-module morpheus_pruner
+module pruner
 
 go 1.13
 

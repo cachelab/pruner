@@ -25,6 +25,7 @@ type Service struct {
 const DefaultElasticsearchURL = "http://elasticsearch:9200"
 const DefaultDelay = 43200 * time.Second
 const DefaultDaysToKeep = 7
+const DefaultMaxRetries = 5
 const DefaultRunOnce = false
 
 func (svc *Service) Init() error {
@@ -32,9 +33,10 @@ func (svc *Service) Init() error {
 	var elasticsearchUrl string
 	var delay time.Duration
 	var daysToKeep int
+	var maxRetries int
 	var runOnce bool
 
-	// Check for the ELASTICSEARCH_URL
+	// Check if there is a ELASTICSEARCH_URL passed in.
 	if os.Getenv("ELASTICSEARCH_URL") == "" {
 		elasticsearchUrl = DefaultElasticsearchURL
 	} else {
@@ -45,7 +47,6 @@ func (svc *Service) Init() error {
 	if os.Getenv("DELAY") == "" {
 		delay = DefaultDelay
 	} else {
-		// Convert the DELAY to a duration.
 		i, err := strconv.Atoi(os.Getenv("DELAY"))
 		if err != nil {
 			return err
@@ -54,16 +55,10 @@ func (svc *Service) Init() error {
 		delay = time.Duration(i) * time.Second
 	}
 
-	// Check if there is a PREFIXES passed in.
-	if os.Getenv("PREFIXES") == "" {
-		return errors.New("Prefixes is a required field.")
-	}
-
 	// Check if there is a DAYS_TO_KEEP passed in.
 	if os.Getenv("DAYS_TO_KEEP") == "" {
 		daysToKeep = DefaultDaysToKeep
 	} else {
-		// Convert the DAYS_TO_KEEP.
 		i, err := strconv.Atoi(os.Getenv("DAYS_TO_KEEP"))
 		if err != nil {
 			return err
@@ -72,7 +67,17 @@ func (svc *Service) Init() error {
 		daysToKeep = i
 	}
 
-	// Check for the RUN_ONCE
+	// Check if there is a MAX_RETRIES passed in.
+	if os.Getenv("MAX_RETRIES") == "" {
+		maxRetries = DefaultMaxRetries
+	} else {
+		maxRetries, err = strconv.Atoi(os.Getenv("MAX_RETRIES"))
+		if err != nil {
+			return err
+		}
+	}
+
+	// Check if there is a RUN_ONCE passed in.
 	if os.Getenv("RUN_ONCE") == "" {
 		runOnce = DefaultRunOnce
 	} else {
@@ -82,10 +87,16 @@ func (svc *Service) Init() error {
 		}
 	}
 
+	// Check if there is a PREFIXES passed in.
+	if os.Getenv("PREFIXES") == "" {
+		return errors.New("Prefixes is a required field.")
+	}
+
 	// Setup the elastic client.
 	client, err := elastic.NewClient(
 		elastic.SetURL(elasticsearchUrl),
 		elastic.SetSniff(false),
+		elastic.SetMaxRetries(maxRetries),
 	)
 	if err != nil {
 		return err
