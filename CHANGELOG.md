@@ -1,3 +1,7 @@
+## 1.0.2 (November 19, 2019)
+
+* Various cleanup items.
+
 ## 1.0.1 (November 12, 2019)
 
 * Unit tests.

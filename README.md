@@ -19,10 +19,10 @@ RUN_ONCE          # used for unit testing or to manually prune once
 
 ## Contributing
 
-* `make run`   - runs the pruner in a docker container
+* `make run` - runs the pruner in a docker container
 * `make build` - builds your pruner docker container
-* `make vet`   - go fmt and vet code
-* `make test`  - run unit tests
+* `make vet` - go fmt and vet code
+* `make test` - run unit tests
 
 Before you submit a pull request please update the semantic version inside of
 `main.go` with what you feel is appropriate and then edit the `CHANGELOG.md` with
